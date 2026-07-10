@@ -10,3 +10,4 @@ readme = "README.md"
 
 [dependencies]
 logos = "0.16"
+unicode-width = "0.2"
