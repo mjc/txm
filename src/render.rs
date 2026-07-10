@@ -34,7 +34,6 @@ pub fn render(expr: &Expr, reg: &SymbolRegistry, ctx: &mut RenderCtx) -> RenderN
                 ctx.depth -= 1;
                 glyph.render(&rendered_args, &[], ctx)
             } else {
-                eprintln!("DEBUG glyph NOT FOUND: {}", name);
                 RenderNode::from_str(name)
             }
         }
