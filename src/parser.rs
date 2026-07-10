@@ -161,9 +161,10 @@ impl<'a> Parser<'a> {
             && self.peek() == Some(&Token::LBrace)
             && args.len() < glyph.required_args()
         {
-            // move
-            let Expr::Command { name, mut args, .. } = base else {
-                unreachable!()
+            let Expr::Command { name, opts, mut args } = base else {
+                return Err(ParseError(
+                    "internal parser error: limits argument base was not a command".into(),
+                ));
             };
 
             self.advance(); // eat {
@@ -171,7 +172,7 @@ impl<'a> Parser<'a> {
             self.expect(Token::RBrace)?;
             args.push(body);
 
-            Expr::Command { name, opts: Vec::new(), args }
+            Expr::Command { name, opts, args }
         } else {
             base
         };
@@ -313,6 +314,9 @@ impl<'a> Parser<'a> {
             }
         };
         self.expect(Token::RBrace)?;
+        if !matches!(env_name.as_str(), "matrix" | "bmatrix" | "pmatrix") {
+            return Err(ParseError(format!("unknown matrix environment: {env_name}")));
+        }
 
         let body_start = self.pos;
         let mut depth = 0u32;
