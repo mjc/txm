@@ -37,7 +37,21 @@ fn boxes_wide_identifier() {
     assert!(output.status.success());
     assert_eq!(
         String::from_utf8_lossy(&output.stdout),
-        "┌────┐\n│    │\n│ 你  │\n│    │\n└────┘\n"
+        "┌────┐\n│    │\n│ 你 │\n│    │\n└────┘\n"
+    );
+}
+
+#[test]
+fn boxes_adjacent_wide_identifiers() {
+    let output = Command::new(env!("CARGO_BIN_EXE_txm"))
+        .arg("你你")
+        .output()
+        .expect("failed to run txm");
+
+    assert!(output.status.success());
+    assert_eq!(
+        String::from_utf8_lossy(&output.stdout),
+        "┌──────┐\n│      │\n│ 你你 │\n│      │\n└──────┘\n"
     );
 }
 
