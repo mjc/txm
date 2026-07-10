@@ -62,19 +62,21 @@ impl Widget for &Math {
         let (content_y, draw_y, visible_height) =
             align_vertical_span(render_height, area.height, self.vertical_alignment);
 
-        let lines: Vec<&str> = self.rendered.lines().collect();
-
-        for row in 0..visible_height {
-            let source_row = content_y + row;
-            let line = lines[source_row as usize];
+        for (row, line) in self
+            .rendered
+            .lines()
+            .skip(content_y as usize)
+            .take(visible_height as usize)
+            .enumerate()
+        {
+            let row = u16::try_from(row).unwrap_or(u16::MAX);
+            let x = area.x + draw_x;
+            let y = area.y + draw_y + row;
             let visible = slice_by_width(line, content_x, visible_width);
-            buf.set_stringn(
-                area.x + draw_x,
-                area.y + draw_y + row,
-                visible,
-                visible_width as usize,
-                self.style,
-            );
+            for col in 0..visible_width {
+                buf[(x + col, y)].reset();
+            }
+            buf.set_stringn(x, y, visible, visible_width as usize, self.style);
         }
     }
 }
@@ -117,7 +119,12 @@ fn slice_by_width(line: &str, start: u16, width: u16) -> &str {
             break;
         }
 
-        if next_col >= end {
+        if next_col > end {
+            end_byte = byte_idx;
+            break;
+        }
+
+        if next_col == end {
             end_byte = byte_idx + ch.len_utf8();
             break;
         }
@@ -173,5 +180,44 @@ fn align_vertical_span(content: u16, area: u16, alignment: VerticalAlignment) ->
             VerticalAlignment::Bottom => content - area,
         };
         (content_start, 0, visible)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{slice_by_width, Math};
+    use ratatui_core::{
+        buffer::Buffer,
+        layout::{HorizontalAlignment, Rect, VerticalAlignment},
+        style::Style,
+        widgets::Widget,
+    };
+
+    #[test]
+    fn slice_by_width_excludes_wide_characters_that_cross_the_end() {
+        assert_eq!(slice_by_width("你", 0, 1), "");
+        assert_eq!(slice_by_width("你", 0, 2), "你");
+    }
+
+    #[test]
+    fn render_clears_short_rows_before_writing() {
+        let math = Math {
+            rendered: "a\nbc\n".into(),
+            style: Style::default(),
+            horizontal_alignment: HorizontalAlignment::Left,
+            vertical_alignment: VerticalAlignment::Top,
+        };
+        let area = Rect::new(0, 0, 2, 2);
+        let mut buffer = Buffer::empty(area);
+        for y in 0..area.height {
+            for x in 0..area.width {
+                buffer[(x, y)].set_symbol("x");
+            }
+        }
+
+        (&math).render(area, &mut buffer);
+
+        assert_eq!(buffer[(0, 0)].symbol(), "a");
+        assert_eq!(buffer[(1, 0)].symbol(), " ");
     }
 }
