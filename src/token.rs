@@ -60,7 +60,7 @@ pub enum Token {
     Number(String),
 
     //can also be without a capture group but with is a bit nicer
-    #[regex(r"([a-zA-Z]|[^ -~\s])+", |lex| lex.slice().to_string())] 
+    #[regex(r"([a-zA-Z]|[^ -~\s])+", |lex| lex.slice().to_string())]
     Ident(String),
 
     #[regex(r"\s+", logos::skip)]
