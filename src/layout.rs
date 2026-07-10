@@ -1,5 +1,7 @@
 use std::fmt;
 
+use crate::parser::ParseError;
+
 #[derive(Debug, Clone)]
 pub struct RenderNode {
     pub width: usize,
@@ -464,17 +466,17 @@ impl RenderNode {
         }
     }
 
-    pub fn matrix(name: &str, rendered_rows: &[Vec<RenderNode>]) -> RenderNode {
+    pub fn matrix(name: &str, rendered_rows: &[Vec<RenderNode>]) -> Result<RenderNode, ParseError> {
         let (left_delim, right_delim) = match name {
             "matrix" => (' ', ' '),
             "bmatrix" => ('[', ']'),
             "pmatrix" => ('(', ')'),
-            _ => (' ', ' '),
+            _ => return Err(ParseError(format!("unknown matrix environment: {name}"))),
         };
 
         let num_rows = rendered_rows.len();
         if num_rows == 0 || rendered_rows[0].is_empty() {
-            return Self::new(0, 0, 0);
+            return Ok(Self::new(0, 0, 0));
         }
 
         let num_cols = rendered_rows[0].len();
@@ -560,7 +562,7 @@ impl RenderNode {
             data,
         };
 
-        RenderNode::stretchy_delim(&matrix, left_delim, right_delim, true)
+        Ok(RenderNode::stretchy_delim(&matrix, left_delim, right_delim, true))
     }
 }
 
