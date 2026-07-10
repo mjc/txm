@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::parser::ParseError;
+use crate::error::ParseError;
 
 #[derive(Debug, Clone)]
 pub struct RenderNode {

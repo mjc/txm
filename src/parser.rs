@@ -1,21 +1,7 @@
-use std::error::Error;
-use std::fmt;
-
 use crate::ast::*;
+use crate::error::ParseError;
 use crate::glyph::SymbolRegistry;
 use crate::token::Token;
-
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-#[allow(dead_code)]
-pub struct ParseError(pub String);
-
-impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
-    }
-}
-
-impl Error for ParseError {}
 
 pub struct Parser<'a> {
     tokens: &'a [Token],
