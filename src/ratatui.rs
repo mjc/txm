@@ -81,8 +81,8 @@ fn rendered_size(rendered: &str) -> (u16, u16) {
     let mut height = 0u16;
 
     for line in rendered.lines() {
-        width = width.max(line.chars().count() as u16);
-        height += 1;
+        width = width.max(u16::try_from(line.chars().count()).unwrap_or(u16::MAX));
+        height = height.saturating_add(1);
     }
 
     (width, height)
