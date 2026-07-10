@@ -15,8 +15,6 @@ mod parser;
 mod render;
 mod token;
 
-pub use parser::ParseError;
-
 const UNIFORM_FRACTION_HEIGHT: bool = false;
 const COMPACT_SIMPLE_FRACTIONAL_EXPONENTS: bool = false;
 
@@ -24,14 +22,14 @@ const COMPACT_SIMPLE_FRACTIONAL_EXPONENTS: bool = false;
 ///
 /// The returned string is newline-terminated and contains one line per
 /// rendered row.
-pub fn render(input: &str) -> Result<String, ParseError> {
-    let tokens = tokenize(input)?;
+pub fn render(input: &str) -> String {
+    let tokens = tokenize(input);
     let reg = registry();
     let mut parser = Parser::new(&tokens, reg);
-    let expr = parser.parse_expr()?;
+    let expr = parser.parse_expr().unwrap();
     let mut ctx = RenderCtx::default();
     let layout = render_expr(&expr, reg, &mut ctx);
-    Ok(layout.to_string())
+    layout.to_string()
 }
 
 fn registry() -> &'static SymbolRegistry {
