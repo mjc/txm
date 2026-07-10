@@ -28,6 +28,14 @@ fn math_renders_centered_text_and_reports_size() {
 }
 
 #[test]
+fn math_reports_display_width_for_wide_characters() {
+    let math = txm::ratatui::Math::new("你你").expect("math creation failed");
+
+    assert_eq!(math.size().width, 4);
+    assert_eq!(math.size().height, 1);
+}
+
+#[test]
 fn math_returns_error_for_invalid_input() {
     assert!(txm::ratatui::Math::new("{x").is_err());
 }
