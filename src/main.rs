@@ -1,10 +1,12 @@
 use std::env;
 
+use unicode_width::UnicodeWidthStr;
+
 fn boxed(rendered: &str) -> String {
     let lines: Vec<&str> = rendered.lines().collect();
     let width = lines
         .iter()
-        .map(|line| line.chars().count())
+        .map(|line| UnicodeWidthStr::width(*line))
         .max()
         .unwrap_or(0);
     let height = lines.len();
