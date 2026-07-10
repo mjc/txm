@@ -163,7 +163,11 @@ impl<'a> Parser<'a> {
         {
             let (name, mut args) = match base {
                 Expr::Command { name, args } => (name, args),
-                _ => return Err(ParseError("internal parser error".into())),
+                _ => {
+                    return Err(ParseError(
+                        "internal parser error: limits argument base was not a command".into(),
+                    ))
+                }
             };
 
             self.advance(); // eat {
@@ -309,10 +313,10 @@ impl<'a> Parser<'a> {
                 ));
             }
         };
+        self.expect(Token::RBrace)?;
         if !matches!(env_name.as_str(), "matrix" | "bmatrix" | "pmatrix") {
             return Err(ParseError(format!("unknown matrix environment: {env_name}")));
         }
-        self.expect(Token::RBrace)?;
 
         let body_start = self.pos;
         let mut depth = 0u32;
