@@ -1,7 +1,7 @@
 use crate::ast::*;
 use crate::glyph::{RenderCtx, SymbolRegistry};
 use crate::layout::RenderNode;
-use crate::parser::ParseError;
+use crate::error::ParseError;
 
 pub fn render(expr: &Expr, reg: &SymbolRegistry, ctx: &mut RenderCtx) -> Result<RenderNode, ParseError> {
     match expr {

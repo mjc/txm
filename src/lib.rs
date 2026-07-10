@@ -9,13 +9,14 @@ use crate::token::tokenize;
 use std::sync::OnceLock;
 
 mod ast;
+mod error;
 mod glyph;
 mod layout;
 mod parser;
 mod render;
 mod token;
 
-pub use parser::ParseError;
+pub use error::ParseError;
 
 const UNIFORM_FRACTION_HEIGHT: bool = false;
 const COMPACT_SIMPLE_FRACTIONAL_EXPONENTS: bool = false;

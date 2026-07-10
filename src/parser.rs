@@ -1,11 +1,7 @@
 use crate::ast::*;
+use crate::error::ParseError;
 use crate::glyph::SymbolRegistry;
 use crate::token::Token;
-
-#[derive(Debug, Clone, Default, PartialEq, Eq, thiserror::Error)]
-#[allow(dead_code)]
-#[error("{0}")]
-pub struct ParseError(pub String);
 
 pub struct Parser<'a> {
     tokens: &'a [Token],

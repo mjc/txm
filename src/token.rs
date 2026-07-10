@@ -1,6 +1,9 @@
 use logos::Logos;
 
-#[derive(Logos, Debug, Clone, PartialEq)]
+use crate::error::ParseError;
+
+#[derive(Logos, Debug, Clone, PartialEq, Eq)]
+#[logos(error = ParseError)]
 pub enum Token {
     #[token("{")]
     LBrace,
@@ -67,6 +70,11 @@ pub enum Token {
     Whitespace,
 }
 
-pub fn tokenize(input: &str) -> Vec<Token> {
-    Token::lexer(input).filter_map(|t| t.ok()).collect()
+pub fn tokenize(input: &str) -> Result<Vec<Token>, ParseError> {
+    Token::lexer(input)
+        .spanned()
+        .map(|(token, span)| {
+            token.map_err(|_| ParseError(format!("Invalid token at byte {}", span.start)))
+        })
+        .collect()
 }
