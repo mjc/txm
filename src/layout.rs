@@ -64,7 +64,7 @@ impl RenderNode {
             return nodes[0].clone();
         }
 
-        let baseline = nodes.iter().map(|n| n.baseline).max().unwrap();
+        let baseline = nodes.iter().map(|n| n.baseline).max().unwrap_or(0);
         let height = nodes
             .iter()
             .map(|n| {
@@ -72,7 +72,7 @@ impl RenderNode {
                 baseline + below
             })
             .max()
-            .unwrap();
+            .unwrap_or(0);
 
         let total_width: usize =
             nodes.iter().map(|n| n.width).sum::<usize>() + spacing * (nodes.len() - 1);
@@ -469,7 +469,7 @@ impl RenderNode {
             "matrix" => (' ', ' '),
             "bmatrix" => ('[', ']'),
             "pmatrix" => ('(', ')'),
-            _ => panic!("invalid matrix type: {name}"),
+            _ => (' ', ' '),
         };
 
         let num_rows = rendered_rows.len();

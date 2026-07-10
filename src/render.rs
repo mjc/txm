@@ -129,7 +129,9 @@ pub fn render(expr: &Expr, reg: &SymbolRegistry, ctx: &mut RenderCtx) -> RenderN
 
             let num_cols = rows[0].len();
             for row in rows {
-                assert!(row.len() == num_cols);
+                if row.len() != num_cols {
+                    return RenderNode::new(0, 0, 0);
+                }
 
                 let mut rendered_row: Vec<RenderNode> = Vec::new();
                 for item in row {
