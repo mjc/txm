@@ -39,6 +39,13 @@ Or
 $ cargo install --git https://github.com/thatmagicalcat/txm
 ```
 
+## Ratatui widget
+Enable the optional widget API with:
+```
+cargo add txm --features ratatui
+```
+Then use `txm::ratatui::Math` to pre-render an expression into a Ratatui buffer.
+
 ## License
 - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
 - MIT license ([LICENSE-MIT](LICENSE-MIT))
