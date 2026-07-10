@@ -1,21 +1,11 @@
-use std::error::Error;
-use std::fmt;
-
 use crate::ast::*;
 use crate::glyph::SymbolRegistry;
 use crate::token::Token;
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, thiserror::Error)]
 #[allow(dead_code)]
+#[error("{0}")]
 pub struct ParseError(pub String);
-
-impl fmt::Display for ParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
-    }
-}
-
-impl Error for ParseError {}
 
 pub struct Parser<'a> {
     tokens: &'a [Token],
@@ -133,7 +123,7 @@ impl<'a> Parser<'a> {
         }
 
         if exprs.len() == 1 {
-            Ok(exprs.into_iter().next().unwrap())
+            Ok(exprs.into_iter().next().unwrap_or(Expr::Empty))
         } else {
             Ok(Expr::Juxtapose(exprs))
         }
@@ -175,9 +165,9 @@ impl<'a> Parser<'a> {
             && self.peek() == Some(&Token::LBrace)
             && args.len() < glyph.required_args()
         {
-            // move
-            let Expr::Command { name, mut args } = base else {
-                unreachable!()
+            let (name, mut args) = match base {
+                Expr::Command { name, args } => (name, args),
+                _ => return Err(ParseError("internal parser error".into())),
             };
 
             self.advance(); // eat {
@@ -323,6 +313,9 @@ impl<'a> Parser<'a> {
                 ));
             }
         };
+        if !matches!(env_name.as_str(), "matrix" | "bmatrix" | "pmatrix") {
+            return Err(ParseError(format!("unknown matrix environment: {env_name}")));
+        }
         self.expect(Token::RBrace)?;
 
         let body_start = self.pos;
@@ -409,6 +402,12 @@ impl<'a> Parser<'a> {
         }
         if !current_row.is_empty() || rows.is_empty() {
             rows.push(current_row);
+        }
+
+        if let Some(width) = rows.first().map(Vec::len)
+            && rows.iter().any(|row| row.len() != width)
+        {
+            return Err(ParseError("matrix rows have different lengths".into()));
         }
 
         Ok(rows)

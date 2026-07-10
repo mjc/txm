@@ -26,6 +26,12 @@ fn main() {
         return;
     }
 
-    let rendered = txm::render(&args[1]);
+    let rendered = match txm::render(&args[1]) {
+        Ok(rendered) => rendered,
+        Err(error) => {
+            eprintln!("error: {error}");
+            std::process::exit(1);
+        }
+    };
     print!("{}", boxed(&rendered));
 }
