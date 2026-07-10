@@ -99,7 +99,7 @@ fn slice_by_width(line: &str, start: u16, width: u16) -> &str {
     let start = usize::from(start);
     let end = start.saturating_add(usize::from(width));
     let mut col = 0usize;
-    let mut start_byte = line.len();
+    let mut start_byte = 0usize;
     let mut end_byte = line.len();
 
     for (byte_idx, ch) in line.char_indices() {

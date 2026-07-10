@@ -36,6 +36,18 @@ fn math_reports_display_width_for_wide_characters() {
 }
 
 #[test]
+fn math_renders_default_left_alignment_when_content_fits() {
+    let math = txm::ratatui::Math::new("ab").expect("math creation failed");
+    let area = Rect::new(0, 0, 4, 1);
+    let mut buffer = Buffer::empty(area);
+
+    (&math).render(area, &mut buffer);
+
+    assert_eq!(buffer[(0, 0)].symbol(), "a");
+    assert_eq!(buffer[(1, 0)].symbol(), "b");
+}
+
+#[test]
 fn math_returns_error_for_invalid_input() {
     assert!(txm::ratatui::Math::new("{x").is_err());
 }
