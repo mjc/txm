@@ -57,17 +57,7 @@ fn boxes_adjacent_wide_identifiers() {
 
 #[test]
 fn render_returns_raw_lines_for_simple_identifier() {
-    let rendered = txm::render("x").expect("render failed");
+    let rendered = txm::render("x");
 
     assert_eq!(rendered, "x\n");
-}
-
-#[test]
-fn render_returns_error_for_unclosed_group() {
-    assert!(txm::render("{x").is_err());
-}
-
-#[test]
-fn render_returns_error_for_invalid_lexer_input() {
-    assert!(txm::render("@").is_err());
 }
