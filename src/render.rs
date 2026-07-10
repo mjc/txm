@@ -29,12 +29,15 @@ pub fn render(expr: &Expr, reg: &SymbolRegistry, ctx: &mut RenderCtx) -> Result<
 
         Expr::Command { name, args } => {
             if let Some(glyph) = reg.get(name) {
-                ctx.depth += 1;
-                let rendered_args: Vec<RenderNode> = args
-                    .iter()
-                    .map(|a| render(a, reg, ctx))
-                    .collect::<Result<_, _>>()?;
-                ctx.depth -= 1;
+                let rendered_args = {
+                    ctx.depth += 1;
+                    let rendered = args
+                        .iter()
+                        .map(|a| render(a, reg, ctx))
+                        .collect::<Result<Vec<_>, _>>();
+                    ctx.depth -= 1;
+                    rendered?
+                };
                 Ok(glyph.render(&rendered_args, &[], ctx))
             } else {
                 Ok(RenderNode::from_str(name))
