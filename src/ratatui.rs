@@ -4,6 +4,7 @@ use ratatui_core::{
     style::Style,
     widgets::Widget,
 };
+use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 #[derive(Debug, Clone)]
 pub struct Math {
@@ -66,12 +67,14 @@ impl Widget for &Math {
         for row in 0..visible_height {
             let source_row = content_y + row;
             let line = lines[source_row as usize];
-            let visible: String = line
-                .chars()
-                .skip(content_x as usize)
-                .take(visible_width as usize)
-                .collect();
-            buf.set_string(area.x + draw_x, area.y + draw_y + row, visible, self.style);
+            let visible = slice_by_width(line, content_x, visible_width);
+            buf.set_stringn(
+                area.x + draw_x,
+                area.y + draw_y + row,
+                visible,
+                visible_width as usize,
+                self.style,
+            );
         }
     }
 }
@@ -81,11 +84,52 @@ fn rendered_size(rendered: &str) -> (u16, u16) {
     let mut height = 0u16;
 
     for line in rendered.lines() {
-        width = width.max(u16::try_from(line.chars().count()).unwrap_or(u16::MAX));
+        width = width.max(u16::try_from(line.width()).unwrap_or(u16::MAX));
         height = height.saturating_add(1);
     }
 
     (width, height)
+}
+
+fn slice_by_width(line: &str, start: u16, width: u16) -> &str {
+    if width == 0 {
+        return "";
+    }
+
+    let start = usize::from(start);
+    let end = start.saturating_add(usize::from(width));
+    let mut col = 0usize;
+    let mut start_byte = line.len();
+    let mut end_byte = line.len();
+
+    for (byte_idx, ch) in line.char_indices() {
+        let ch_width = UnicodeWidthChar::width(ch).unwrap_or(0);
+        let next_col = col.saturating_add(ch_width);
+
+        if next_col <= start {
+            start_byte = byte_idx + ch.len_utf8();
+        } else if col < start {
+            start_byte = byte_idx + ch.len_utf8();
+        }
+
+        if col >= end {
+            end_byte = byte_idx;
+            break;
+        }
+
+        if next_col >= end {
+            end_byte = byte_idx + ch.len_utf8();
+            break;
+        }
+
+        col = next_col;
+    }
+
+    if start_byte >= end_byte {
+        ""
+    } else {
+        &line[start_byte.min(line.len())..end_byte.min(line.len())]
+    }
 }
 
 fn align_horizontal_span(
