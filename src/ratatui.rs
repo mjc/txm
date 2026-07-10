@@ -57,6 +57,12 @@ impl Widget for &Math {
             return;
         }
 
+        for y in area.y..area.y + area.height {
+            for x in area.x..area.x + area.width {
+                buf[(x, y)].reset();
+            }
+        }
+
         let (content_x, draw_x, visible_width) =
             align_horizontal_span(render_width, area.width, self.horizontal_alignment);
         let (content_y, draw_y, visible_height) =
@@ -73,9 +79,6 @@ impl Widget for &Math {
             let x = area.x + draw_x;
             let y = area.y + draw_y + row;
             let visible = slice_by_width(line, content_x, visible_width);
-            for col in 0..visible_width {
-                buf[(x + col, y)].reset();
-            }
             buf.set_stringn(x, y, visible, visible_width as usize, self.style);
         }
     }
@@ -219,5 +222,28 @@ mod tests {
 
         assert_eq!(buffer[(0, 0)].symbol(), "a");
         assert_eq!(buffer[(1, 0)].symbol(), " ");
+    }
+
+    #[test]
+    fn render_clears_alignment_padding() {
+        let math = Math {
+            rendered: "a\n".into(),
+            style: Style::default(),
+            horizontal_alignment: HorizontalAlignment::Center,
+            vertical_alignment: VerticalAlignment::Center,
+        };
+        let area = Rect::new(0, 0, 3, 3);
+        let mut buffer = Buffer::empty(area);
+        for y in 0..area.height {
+            for x in 0..area.width {
+                buffer[(x, y)].set_symbol("x");
+            }
+        }
+
+        (&math).render(area, &mut buffer);
+
+        assert_eq!(buffer[(0, 0)].symbol(), " ");
+        assert_eq!(buffer[(1, 1)].symbol(), "a");
+        assert_eq!(buffer[(2, 2)].symbol(), " ");
     }
 }
