@@ -38,3 +38,8 @@ fn render_returns_raw_lines_for_simple_identifier() {
 fn render_returns_error_for_unclosed_group() {
     assert!(txm::render("{x").is_err());
 }
+
+#[test]
+fn render_returns_error_for_invalid_lexer_input() {
+    assert!(txm::render("@").is_err());
+}

@@ -6,6 +6,8 @@ use crate::parser::Parser;
 use crate::render::render as render_expr;
 use crate::token::tokenize;
 
+use std::sync::OnceLock;
+
 mod ast;
 mod glyph;
 mod layout;
@@ -20,13 +22,18 @@ const COMPACT_SIMPLE_FRACTIONAL_EXPONENTS: bool = false;
 
 /// Renders a math expression to plain text lines.
 pub fn render(input: &str) -> Result<String, ParseError> {
-    let reg = build_registry();
-    let tokens = tokenize(input);
-    let mut parser = Parser::new(&tokens, &reg);
+    let tokens = tokenize(input)?;
+    let reg = registry();
+    let mut parser = Parser::new(&tokens, reg);
     let expr = parser.parse_expr()?;
     let mut ctx = RenderCtx::default();
-    let layout = render_expr(&expr, &reg, &mut ctx);
+    let layout = render_expr(&expr, reg, &mut ctx);
     Ok(layout.to_string())
+}
+
+fn registry() -> &'static SymbolRegistry {
+    static REGISTRY: OnceLock<SymbolRegistry> = OnceLock::new();
+    REGISTRY.get_or_init(build_registry)
 }
 
 fn build_registry() -> SymbolRegistry {

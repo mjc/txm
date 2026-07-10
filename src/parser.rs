@@ -5,7 +5,7 @@ use crate::ast::*;
 use crate::glyph::SymbolRegistry;
 use crate::token::Token;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 #[allow(dead_code)]
 pub struct ParseError(pub String);
 
@@ -16,6 +16,12 @@ impl fmt::Display for ParseError {
 }
 
 impl Error for ParseError {}
+
+impl ParseError {
+    pub fn from_lexer(lex: &mut logos::Lexer<'_, crate::token::Token>) -> Self {
+        Self(format!("Invalid token at byte {}", lex.span().start))
+    }
+}
 
 pub struct Parser<'a> {
     tokens: &'a [Token],

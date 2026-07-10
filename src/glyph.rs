@@ -9,7 +9,7 @@ pub struct RenderCtx {
     pub depth: usize,
 }
 
-pub trait Glyph: Debug {
+pub trait Glyph: Debug + Send + Sync {
     fn required_args(&self) -> usize {
         0
     }
