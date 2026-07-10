@@ -26,6 +26,6 @@ fn main() {
         return;
     }
 
-    let rendered = txm::render(&args[1]).unwrap();
+    let rendered = txm::render(&args[1]);
     print!("{}", boxed(&rendered));
 }
