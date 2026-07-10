@@ -165,7 +165,7 @@ impl<'a> Parser<'a> {
                 Expr::Command { name, args } => (name, args),
                 _ => {
                     return Err(ParseError(
-                        "internal parser error: limits argument base was not a command".into(),
+                        "invalid limits argument: expected a command before grouped argument".into(),
                     ))
                 }
             };

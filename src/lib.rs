@@ -23,8 +23,8 @@ const COMPACT_SIMPLE_FRACTIONAL_EXPONENTS: bool = false;
 
 /// Renders a math expression to plain text lines.
 ///
-/// The returned string is newline-terminated and contains one line per
-/// rendered row.
+/// On success, the returned string is newline-terminated and contains one line
+/// per rendered row. Returns `ParseError` for lexer, parser, or render errors.
 pub fn render(input: &str) -> Result<String, ParseError> {
     let tokens = tokenize(input)?;
     let reg = registry();
