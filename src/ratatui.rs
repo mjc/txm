@@ -8,8 +8,6 @@ use ratatui_core::{
 #[derive(Debug, Clone)]
 pub struct Math {
     rendered: String,
-    width: u16,
-    height: u16,
     style: Style,
     horizontal_alignment: HorizontalAlignment,
     vertical_alignment: VerticalAlignment,
@@ -18,11 +16,8 @@ pub struct Math {
 impl Math {
     pub fn new(input: &str) -> Result<Self, crate::ParseError> {
         let rendered = crate::render(input)?;
-        let (width, height) = rendered_size(&rendered);
         Ok(Self {
             rendered,
-            width,
-            height,
             style: Style::default(),
             horizontal_alignment: HorizontalAlignment::Left,
             vertical_alignment: VerticalAlignment::Top,
@@ -30,7 +25,8 @@ impl Math {
     }
 
     pub fn size(&self) -> Size {
-        Rect::new(0, 0, self.width, self.height).as_size()
+        let (width, height) = rendered_size(&self.rendered);
+        Rect::new(0, 0, width, height).as_size()
     }
 
     pub fn style(mut self, style: Style) -> Self {
@@ -51,35 +47,31 @@ impl Math {
 
 impl Widget for &Math {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        if self.width == 0 || self.height == 0 || area.width == 0 || area.height == 0 {
+        if area.width == 0 || area.height == 0 {
+            return;
+        }
+
+        let (render_width, render_height) = rendered_size(&self.rendered);
+        if render_width == 0 || render_height == 0 {
             return;
         }
 
         let (content_x, draw_x, visible_width) =
-            align_horizontal_span(self.width, area.width, self.horizontal_alignment);
+            align_horizontal_span(render_width, area.width, self.horizontal_alignment);
         let (content_y, draw_y, visible_height) =
-            align_vertical_span(self.height, area.height, self.vertical_alignment);
+            align_vertical_span(render_height, area.height, self.vertical_alignment);
 
         let lines: Vec<&str> = self.rendered.lines().collect();
 
         for row in 0..visible_height {
             let source_row = content_y + row;
             let line = lines[source_row as usize];
-
-            for (col, ch) in line
+            let visible: String = line
                 .chars()
                 .skip(content_x as usize)
                 .take(visible_width as usize)
-                .enumerate()
-            {
-                let x = area.x + draw_x + col as u16;
-                let y = area.y + draw_y + row;
-
-                let mut symbol = [0; 4];
-                buf[(x, y)]
-                    .set_symbol(ch.encode_utf8(&mut symbol))
-                    .set_style(self.style);
-            }
+                .collect();
+            buf.set_string(area.x + draw_x, area.y + draw_y + row, visible, self.style);
         }
     }
 }
