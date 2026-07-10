@@ -3,7 +3,7 @@ use logos::Logos;
 use crate::parser::ParseError;
 
 #[derive(Logos, Debug, Clone, PartialEq, Eq)]
-#[logos(error(ParseError, ParseError::from_lexer))]
+#[logos(error = ParseError)]
 pub enum Token {
     #[token("{")]
     LBrace,
