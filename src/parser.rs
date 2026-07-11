@@ -169,14 +169,14 @@ impl<'a> Parser<'a> {
         // has_limits = true and if the next symbol after parsing scripts
         // was LBrace, it is an argument
 
-        let mut result = if let Expr::Command { name, args } = &base
+        let mut result = if let Expr::Command { name, args, .. } = &base
             && let Some(glyph) = self.registry.get(name)
             && glyph.has_limits()
             && self.peek() == Some(&Token::LBrace)
             && args.len() < glyph.required_args()
         {
             // move
-            let Expr::Command { name, mut args } = base else {
+            let Expr::Command { name, mut args, .. } = base else {
                 unreachable!()
             };
 
@@ -185,7 +185,7 @@ impl<'a> Parser<'a> {
             self.expect(Token::RBrace)?;
             args.push(body);
 
-            Expr::Command { name, args }
+            Expr::Command { name, opts: Vec::new(), args }
         } else {
             base
         };
@@ -252,6 +252,7 @@ impl<'a> Parser<'a> {
                 self.expect(Token::Pipe)?;
                 Ok(Expr::Command {
                     name: "|".into(),
+                    opts: Vec::new(),
                     args: vec![inner],
                 })
             }
@@ -285,13 +286,14 @@ impl<'a> Parser<'a> {
         let has_opt = glyph.is_some_and(|g| g.has_optional());
         let n_req = glyph.map_or(0, |g| g.required_args());
         let has_limits = glyph.is_some_and(|g| g.has_limits());
+        let mut opts = Vec::new();
         let mut args = Vec::new();
 
         if has_opt && self.peek() == Some(&Token::LBracket) {
             self.advance();
             let opt = self.parse_expr()?;
             self.expect(Token::RBracket)?;
-            args.push(opt);
+            opts.push(opt);
         }
 
         if !has_limits {
@@ -305,6 +307,7 @@ impl<'a> Parser<'a> {
 
         Ok(Expr::Command {
             name: name.to_string(),
+            opts,
             args,
         })
     }
