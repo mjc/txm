@@ -57,8 +57,8 @@ impl Widget for &Math {
             return;
         }
 
-        for y in area.y..area.y + area.height {
-            for x in area.x..area.x + area.width {
+        for y in area.y..area.y.saturating_add(area.height) {
+            for x in area.x..area.x.saturating_add(area.width) {
                 buf[(x, y)].reset();
             }
         }
@@ -76,8 +76,8 @@ impl Widget for &Math {
             .enumerate()
         {
             let row = u16::try_from(row).unwrap_or(u16::MAX);
-            let x = area.x + draw_x;
-            let y = area.y + draw_y + row;
+            let x = area.x.saturating_add(draw_x);
+            let y = area.y.saturating_add(draw_y).saturating_add(row);
             let visible = slice_by_width(line, content_x, visible_width);
             buf.set_stringn(x, y, visible, visible_width as usize, self.style);
         }
