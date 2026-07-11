@@ -167,7 +167,7 @@ fn render_power(
     ctx: &mut RenderCtx,
 ) -> Result<RenderNode, ParseError> {
     if crate::COMPACT_SIMPLE_FRACTIONAL_EXPONENTS
-        && let Expr::Command { name, args } = exp
+        && let Expr::Command { name, args, .. } = exp
         && name == "frac"
         && args.len() == 2
         && let (Expr::Number(n), Expr::Number(d)) = (&args[0], &args[1])
