@@ -188,7 +188,7 @@ fn align_vertical_span(content: u16, area: u16, alignment: VerticalAlignment) ->
 
 #[cfg(test)]
 mod tests {
-    use super::{slice_by_width, Math};
+    use super::{Math, slice_by_width};
     use ratatui_core::{
         buffer::Buffer,
         layout::{HorizontalAlignment, Rect, VerticalAlignment},
